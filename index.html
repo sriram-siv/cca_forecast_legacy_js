@@ -30,13 +30,13 @@
             }
         }
 
-        function average(nums, unit = "") {
+        function getAverage(nums, unit = "") {
             if (!nums.length) return "Insufficient forecast data";
 
             const total = nums.reduce((acc, num) => acc + num);
             const average = (total / nums.length).toFixed(2);
 
-            return unit ? `${average} ${unit}` : average;
+            return `${average}${unit}`
         }
 
 
@@ -73,10 +73,10 @@
                         month: 'long',
                         day: 'numeric'
                     })}</h3>
-                    <p>Morning Average Temperature: ${average(morningTemps)}</p>
-                    <p>Morning Chance Of Rain: ${morningRains.length ? (morningRains.reduce((a, b) => a + b, 0) / morningRains.length).toFixed(2) + '%' : 'Insufficient forecast data'}</p>
-                    <p>Afternoon Average Temperature: ${afternoonTemps.length ? (afternoonTemps.reduce((a, b) => a + b, 0) / afternoonTemps.length).toFixed(2) : 'Insufficient forecast data'}</p>
-                    <p>Afternoon Chance Of Rain: ${afternoonRains.length ? (afternoonRains.reduce((a, b) => a + b, 0) / afternoonRains.length).toFixed(2) + '%' : 'Insufficient forecast data'}</p>
+                    <p>Morning Average Temperature: ${getAverage(morningTemps)}</p>
+                    <p>Morning Chance Of Rain: ${getAverage(morningRains, "%")}</p>
+                    <p>Afternoon Average Temperature: ${getAverage(afternoonTemps)}</p>
+                    <p>Afternoon Chance Of Rain: ${getAverage(afternoonRains, "%")}</p>
                     <p>High Temperature: ${Math.max(...allTemps)}</p>
                     <p>Low Temperature: ${Math.min(...allTemps)}</p>
                 `;
