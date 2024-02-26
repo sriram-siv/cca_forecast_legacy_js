@@ -27,42 +27,39 @@ function getAverage(nums, unit = "") {
   return `${average}${unit}`;
 }
 
-async function main() {
-  try {
-    const weatherData = await fetchData();
+async function main(weatherData) {
+  // Process data
+  const groupedData = weatherData.reduce((acc, entry) => {
+    const entryDate = new Date(entry.date_time);
+    const dayKey = entryDate.toISOString().split("T")[0];
+    if (!acc[dayKey]) {
+      acc[dayKey] = [];
+    }
+    acc[dayKey].push(entry);
+    return acc;
+  }, {});
 
-    // Process data
-    const groupedData = weatherData.reduce((acc, entry) => {
-      const entryDate = new Date(entry.date_time);
-      const dayKey = entryDate.toISOString().split("T")[0];
-      if (!acc[dayKey]) {
-        acc[dayKey] = [];
-      }
-      acc[dayKey].push(entry);
-      return acc;
-    }, {});
+  const container = document.getElementById("forecast-summaries");
+  Object.entries(groupedData).forEach(([day, entries]) => {
+    const allTemps = entries.map((entry) => entry.average_temperature);
+    const morningEntries = entries.filter(isBetweenHours(6, 12));
+    const afternoonEntries = entries.filter(isBetweenHours(12, 18));
 
-    const container = document.getElementById("forecast-summaries");
-    Object.entries(groupedData).forEach(([day, entries]) => {
-      const allTemps = entries.map((entry) => entry.average_temperature);
-      const morningEntries = entries.filter(isBetweenHours(6, 12));
-      const afternoonEntries = entries.filter(isBetweenHours(12, 18));
+    const morningTemps = morningEntries.map(
+      (entry) => entry.average_temperature
+    );
+    const morningRains = morningEntries.map(
+      (entry) => entry.probability_of_rain
+    );
+    const afternoonTemps = afternoonEntries.map(
+      (entry) => entry.average_temperature
+    );
+    const afternoonRains = afternoonEntries.map(
+      (entry) => entry.probability_of_rain
+    );
 
-      const morningTemps = morningEntries.map(
-        (entry) => entry.average_temperature
-      );
-      const morningRains = morningEntries.map(
-        (entry) => entry.probability_of_rain
-      );
-      const afternoonTemps = afternoonEntries.map(
-        (entry) => entry.average_temperature
-      );
-      const afternoonRains = afternoonEntries.map(
-        (entry) => entry.probability_of_rain
-      );
-
-      const summaryElement = document.createElement("div");
-      summaryElement.innerHTML = `
+    const summaryElement = document.createElement("div");
+    summaryElement.innerHTML = `
           <h3>Day: ${new Date(day).toLocaleDateString(undefined, {
             weekday: "long",
             month: "long",
@@ -75,11 +72,16 @@ async function main() {
           <p>High Temperature: ${Math.max(...allTemps)}</p>
           <p>Low Temperature: ${Math.min(...allTemps)}</p>
       `;
-      container.appendChild(summaryElement);
-    });
-  } catch (error) {
-    console.error("Failed to fetch weather data:", error);
-  }
+    container.appendChild(summaryElement);
+  });
 }
 
-document.addEventListener("DOMContentLoaded", main);
+try {
+  document.addEventListener("DOMContentLoaded", async () => {
+    const weatherData = await fetchData();
+
+    main(weatherData);
+  });
+} catch (error) {
+  console.error("Failed to fetch weather data:", error);
+}
