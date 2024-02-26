@@ -23,6 +23,13 @@
             return weatherData;
         }
 
+        function isBetweenHours(min, max) {
+            return (entry) => {
+                const hour = new Date(entry.date_time).getHours();
+                return min <= hour && hour < max;
+            }
+        }
+
         async function main() {
             try {
                 const weatherData = await fetchData();
@@ -41,14 +48,8 @@
                 const container = document.getElementById('forecast-summaries');
                 Object.entries(groupedData).forEach(([day, entries]) => {
                     const allTemps = entries.map(entry => entry.average_temperature);
-                    const morningEntries = entries.filter(entry => {
-                        const hour = new Date(entry.date_time).getHours();
-                        return hour >= 6 && hour < 12;
-                    });
-                    const afternoonEntries = entries.filter(entry => {
-                        const hour = new Date(entry.date_time).getHours();
-                        return hour >= 12 && hour < 18;
-                    });
+                    const morningEntries = entries.filter(isBetweenHours(6, 12));
+                    const afternoonEntries = entries.filter(isBetweenHours(12, 18));
 
                     const morningTemps = morningEntries.map(entry => entry.average_temperature);
                     const morningRains = morningEntries.map(entry => entry.probability_of_rain);
