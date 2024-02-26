@@ -39,8 +39,7 @@ async function main(weatherData) {
     return acc;
   }, {});
 
-  const container = document.getElementById("forecast-summaries");
-  Object.entries(groupedData).forEach(([day, entries]) => {
+  const output = Object.entries(groupedData).map(([day, entries]) => {
     const allTemps = entries.map((entry) => entry.average_temperature);
     const morningEntries = entries.filter(isBetweenHours(6, 12));
     const afternoonEntries = entries.filter(isBetweenHours(12, 18));
@@ -58,8 +57,7 @@ async function main(weatherData) {
       (entry) => entry.probability_of_rain
     );
 
-    const summaryElement = document.createElement("div");
-    summaryElement.innerHTML = `
+    return `
           <h3>Day: ${new Date(day).toLocaleDateString(undefined, {
             weekday: "long",
             month: "long",
@@ -72,6 +70,13 @@ async function main(weatherData) {
           <p>High Temperature: ${Math.max(...allTemps)}</p>
           <p>Low Temperature: ${Math.min(...allTemps)}</p>
       `;
+  });
+
+  const container = document.getElementById("forecast-summaries");
+
+  output.forEach((child) => {
+    const summaryElement = document.createElement("div");
+    summaryElement.innerHTML = child;
     container.appendChild(summaryElement);
   });
 }
